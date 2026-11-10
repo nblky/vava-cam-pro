@@ -1,0 +1,11 @@
+#!/bin/sh
+# BusyBox ntpd/OpenWrt hotplug reports successful synchronization as stratum.
+[ "${ACTION:-}" = stratum ] || exit 0
+ntp_stratum="${stratum:-${STRATUM:-}}"
+case "$ntp_stratum" in ''|*[!0-9]*) exit 0 ;; esac
+[ "$ntp_stratum" -ge 1 ] && [ "$ntp_stratum" -le 15 ] || exit 0
+umask 077
+: >/tmp/vava-clock-synced
+state_dir="$(uci -q get vava-agent.main.state_dir)"
+[ -n "$state_dir" ] || state_dir=/etc/vava-state
+/usr/bin/vavactl -s "$state_dir/control.sock" clock-valid 1 >/dev/null 2>&1 || :

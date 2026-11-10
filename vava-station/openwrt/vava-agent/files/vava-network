@@ -1,0 +1,88 @@
+#!/bin/sh
+# Explicit installation step. Only new, dedicated UCI sections are created.
+set -eu
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+[ "${1:-}" = setup ] && [ "$#" -eq 2 ] || { echo 'usage: vava-network setup radio0' >&2; exit 2; }
+radio="$2"
+case "$radio" in radio*) ;; *) exit 2 ;; esac
+case "${radio#radio}" in ''|*[!0-9]*) exit 2 ;; esac
+[ "$(uci -q get "wireless.$radio")" = wifi-device ]
+for section in network.vava_bridge network.vava wireless.vava_camera wireless.vava_pair dhcp.vava \
+	firewall.vava firewall.vava_dhcp firewall.vava_control; do
+	if uci -q get "$section" >/dev/null; then echo "section exists: $section; no changes made" >&2; exit 1; fi
+done
+for credential in wifi-key; do
+	[ ! -e "/etc/vava/$credential" ] && [ ! -L "/etc/vava/$credential" ] || {
+		echo 'existing credentials; configure UCI manually' >&2; exit 1;
+	}
+done
+umask 077
+mkdir -p /etc/vava
+random_hex() {
+	local value
+	if command -v hexdump >/dev/null 2>&1; then
+		value="$(hexdump -v -n "$1" -e '1/1 "%02x"' /dev/urandom)" || return 1
+	else
+		command -v od >/dev/null 2>&1 || return 1
+		value="$(od -An -N "$1" -tx1 /dev/urandom | tr -d ' \n')" || return 1
+	fi
+	[ "${#value}" -eq "$((2 * $1))" ] || return 1
+	case "$value" in *[!0-9a-f]*) return 1 ;; esac
+	printf '%s' "$value"
+}
+# Validate all entropy before creating credentials or changing any UCI section.
+key="$(random_hex 12)"
+suffix="$(random_hex 4)"
+printf '%s' "$key" >/etc/vava/wifi-key
+ssid="VAVA-Local-$suffix"
+uci set network.vava_bridge=device
+uci set network.vava_bridge.name=br-vava
+uci set network.vava_bridge.type=bridge
+uci set network.vava=interface
+uci set network.vava.device=br-vava
+uci set network.vava.proto=static
+uci set network.vava.ipaddr=172.26.168.1
+# Original cameras can retain addresses anywhere in 172.26.0.0/16.
+uci set network.vava.netmask=255.255.0.0
+uci set "wireless.$radio.disabled=0"
+for name in vava_camera vava_pair; do
+	uci set "wireless.$name=wifi-iface"
+	uci set "wireless.$name.device=$radio"
+	uci set "wireless.$name.network=vava"
+	uci set "wireless.$name.mode=ap"
+	uci set "wireless.$name.encryption=psk2"
+	uci set "wireless.$name.isolate=1"
+done
+uci set "wireless.vava_camera.ssid=$ssid"
+uci set "wireless.vava_camera.key=$key"
+uci set wireless.vava_camera.disabled=0
+uci set wireless.vava_pair.ssid=VAPair-disabled
+uci set wireless.vava_pair.key=DisabledPairingKey
+uci set wireless.vava_pair.disabled=1
+uci set dhcp.vava=dhcp
+uci set dhcp.vava.interface=vava
+uci set dhcp.vava.start=100
+uci set dhcp.vava.limit=20
+uci set dhcp.vava.leasetime=12h
+uci set firewall.vava=zone
+uci set firewall.vava.name=vava
+uci add_list firewall.vava.network=vava
+uci set firewall.vava.input=REJECT
+uci set firewall.vava.output=ACCEPT
+uci set firewall.vava.forward=REJECT
+uci set firewall.vava_dhcp=rule
+uci set firewall.vava_dhcp.name=VAVA-DHCP
+uci set firewall.vava_dhcp.src=vava
+uci set firewall.vava_dhcp.proto=udp
+uci set firewall.vava_dhcp.dest_port=67
+uci set firewall.vava_dhcp.target=ACCEPT
+uci set firewall.vava_control=rule
+uci set firewall.vava_control.name=VAVA-Camera-Connections
+uci set firewall.vava_control.src=vava
+uci set firewall.vava_control.proto=tcp
+uci set firewall.vava_control.dest_port='16154 18154 20154'
+uci set firewall.vava_control.target=ACCEPT
+uci set "vava-agent.main.ssid=$ssid"
+for config in network wireless dhcp firewall vava-agent; do uci commit "$config"; done
+chmod 600 /etc/config/wireless
+echo 'Dedicated network configuration saved. Review it, mount recording storage, then reload network/wifi/firewall/dnsmasq and enable vava-agent.'

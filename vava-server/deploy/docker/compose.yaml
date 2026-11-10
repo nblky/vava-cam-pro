@@ -1,0 +1,27 @@
+services:
+  vava-server:
+    build:
+      context: ../../..
+      dockerfile: vava-server/deploy/docker/Dockerfile
+    image: vava-cam-pro/server:local
+    user: "${VAVA_UID:-10001}:${VAVA_GID:-10001}"
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+    ports:
+      - "${VAVA_UDP_PORT:-3731}:3731/udp"
+      - "${VAVA_HTTPS_PORT:-8443}:8443/tcp"
+    environment:
+      VAVA_DATA_DIR: /var/lib/vava-server
+      VAVA_DEVICE_KEYS: /etc/vava-server/devices.keys
+      VAVA_ADMIN_PASSWORD_FILE: /etc/vava-server/initial-admin-password
+      VAVA_WEB_BIND: 0.0.0.0
+      VAVA_WEB_PORT: 8443
+      VAVA_WEB_CERT: /etc/vava-server/tls/fullchain.pem
+      VAVA_WEB_KEY: /etc/vava-server/tls/server.key
+      VAVA_FILE_QUOTA_MB: "${VAVA_FILE_QUOTA_MB:-10240}"
+    volumes:
+      - "${VAVA_DEPLOY_ROOT:?Set VAVA_DEPLOY_ROOT to your provisioned directory}/config:/etc/vava-server:ro"
+      - "${VAVA_DEPLOY_ROOT}/data:/var/lib/vava-server"

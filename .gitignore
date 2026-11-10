@@ -1,0 +1,51 @@
+# Local builds, lab evidence and persistent runtime data
+/build*/
+/.deps/
+/artifacts/
+/run/
+/dist/
+/private/
+/.venv/
+/venv/
+/SOURCE_MANIFEST.json
+# Archived HTTP prototype lives outside the source repository.
+/legacy/
+
+# Credentials and local configuration (examples remain distributable)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+devices.keys
+server-key
+api-session
+initial-admin-password
+
+# Generated caches and editor files
+__pycache__/
+*.pyc
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Databases, firmware, packages, captures and media are not source code
+*.sqlite3*
+*.db
+*.db-wal
+*.db-shm
+*.bin
+*.pcap
+*.pcapng
+*.sealed
+*.h264
+*.aac
+*.mp4
+*.mkv
+*.webm
+*.ipk
+*.apk

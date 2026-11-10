@@ -1,0 +1,20 @@
+{
+  "luci-app-vava-agent": {
+    "description": "Read VAVA Agent status and configure its own service",
+    "read": {
+      "uci": ["vava-agent"],
+      "ubus": {"service": ["list"], "file": ["exec"]},
+      "file": {"/usr/libexec/vava-agent-status": ["exec"]}
+    },
+    "write": {
+      "uci": ["vava-agent"],
+      "ubus": {"file": ["exec"]},
+      "file": {
+        "/usr/libexec/vava-agent-pair": ["exec"],
+        "/usr/libexec/vava-agent-unpair": ["exec"],
+        "/usr/libexec/vava-agent-reset": ["exec"],
+        "/usr/libexec/vava-agent-name": ["exec"]
+      }
+    }
+  }
+}

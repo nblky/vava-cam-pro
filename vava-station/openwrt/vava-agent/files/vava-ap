@@ -1,0 +1,27 @@
+#!/bin/sh
+# Dedicated pairing AP only. Credentials arrive on stdin, never the process list.
+set -eu
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+[ "$(uci -q get wireless.vava_pair)" = wifi-iface ]
+radio="$(uci -q get wireless.vava_pair.device)"
+case "$radio" in radio*) ;; *) exit 2 ;; esac
+case "${radio#radio}" in ''|*[!0-9]*) exit 2 ;; esac
+case "${1:-}" in
+	open)
+		IFS= read -r pair_name
+		IFS= read -r pair_key
+		[ "${#pair_name}" -eq 15 ] && [ "${pair_name#VAPair-}" != "$pair_name" ]
+		suffix="${pair_name#VAPair-}"
+		case "$suffix" in *[!0-9A-Za-z]*) exit 2 ;; esac
+		[ "${#pair_key}" -eq 8 ]
+		expected="va$(printf '%s' "$suffix" | cut -c 7-8)$(printf '%s' "$suffix" | cut -c 1-2)$(printf '%s' "$suffix" | cut -c 5-6)"
+		[ "$pair_key" = "$expected" ]
+		uci set "wireless.vava_pair.ssid=$pair_name"
+		uci set "wireless.vava_pair.key=$pair_key"
+		uci set wireless.vava_pair.disabled=0
+		;;
+	close) uci set wireless.vava_pair.disabled=1 ;;
+	*) exit 2 ;;
+esac
+# Do not commit temporary pairing credentials or the open state to flash.
+exec /sbin/wifi reload "$radio"

@@ -1,0 +1,7 @@
+{
+  "admin/services/vava-agent": {
+    "title": "VAVA Agent", "order": 65,
+    "action": {"type": "view", "path": "vava-agent/settings"},
+    "depends": {"acl": ["luci-app-vava-agent"], "uci": {"vava-agent": true}}
+  }
+}

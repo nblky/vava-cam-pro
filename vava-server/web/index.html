@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>VAVA Home · 设备管理</title>
+<link rel="stylesheet" href="./style.css">
+<script src="./config.js" defer></script>
+<script src="./api-client.js" defer></script>
+<script src="./management.js" defer></script>
+<script src="./app.js" defer></script>
+</head>
+<body class="management">
+<a class="skip-link" href="#content">跳到页面内容</a>
+<header class="topbar">
+  <a class="brand" href="#overview" aria-label="VAVA Home 概述">VAVA Home</a>
+  <div class="header-actions"><span id="connection" class="badge">未连接</span><button id="theme" class="icon-button" aria-label="切换明暗主题" title="切换明暗主题">◐</button><button id="logout" class="quiet" hidden>退出登录</button></div>
+</header>
+<div class="scopebar"><div><span class="scope-icon" aria-hidden="true">⌘</span><label for="stationSelect">当前基站</label><select id="stationSelect" aria-label="当前基站"></select><span class="scope-tag">私有管理</span></div></div>
+<nav id="navigation" aria-label="主导航" hidden>
+  <button data-page="overview" class="active">概述</button><button data-page="camera">摄像头设置</button><button data-page="recordings">事件短片</button><button data-page="events">事件消息</button><button data-page="station">基站设置</button><button data-page="tasks">操作记录</button><button data-page="cloud-storage">云存储</button>
+</nav>
+<main>
+  <section id="login" class="login">
+    <div class="login-intro"><p class="eyebrow">YOUR CAMERAS. YOUR CONTROL.</p><h1>每一处动静，<br>尽在掌握。</h1><p>连接你的基站，在自己的平台上观看画面、查看事件与管理摄像头。</p><div class="login-features"><span>按需实时观看</span><span>事件短片归档</span><span>独立管理每台基站</span></div><span class="login-wordmark" aria-hidden="true">VAVA Home</span></div>
+    <div class="login-form-panel"><p class="eyebrow">管理平台</p><h2>登录 VAVA Home</h2><p class="muted">使用管理员为你创建的账户。</p>
+      <form id="loginForm"><label for="username">用户名</label><input id="username" autocomplete="username" required value="admin"><label for="token">密码</label><input id="token" type="password" autocomplete="current-password" required minlength="12" maxlength="128" placeholder="输入登录密码"><details class="login-endpoint"><summary>连接其他管理服务器</summary><label for="apiBase">服务器地址</label><input id="apiBase" type="text" autocomplete="url" placeholder="留空使用当前网站"></details><button class="primary" id="connect">登录</button></form><p class="hint">登录会话仅保留在当前标签页。</p>
+    </div>
+  </section>
+  <div id="notice" role="status" aria-live="polite" hidden></div>
+  <section id="downloadPanel" class="download-panel" aria-label="下载进度" hidden><div><strong id="downloadLabel"></strong><span id="downloadSize"></span><progress id="downloadProgress" aria-label="媒体下载进度"></progress></div><button id="downloadCancel">取消下载</button></section>
+  <div id="workspace" hidden>
+    <div class="page-heading"><div><p class="eyebrow" id="breadcrumb">设备管理 / 概述</p><h1 id="pageTitle">概述</h1><p class="muted" id="pageSubtitle">基站与摄像头的运行情况。</p></div><div class="row page-tools"><label for="cameraSelect" class="sr-only">当前摄像头</label><select id="cameraSelect"></select><button id="refresh" class="quiet">↻ 刷新</button></div></div>
+    <div id="cameraContext" class="context" hidden></div>
+    <div id="layout"><aside id="rail" hidden><label for="search" class="sr-only">搜索配置</label><input id="search" type="search" placeholder="搜索设置"><nav id="sections" aria-label="配置分类"></nav><p class="hint" id="railHint">每台摄像头独立保存设置。</p></aside><div id="content" tabindex="-1"></div></div>
+  </div>
+  <noscript><p class="card">请启用 JavaScript 以使用管理平台。</p></noscript>
+</main>
+<footer><a class="footer-brand" href="#overview">VAVA Home</a><span>Agent <span id="version">—</span><span class="footer-separator">·</span>你的设备，你的管理平台</span></footer>
+</body>
+</html>

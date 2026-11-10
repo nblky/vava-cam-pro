@@ -1,0 +1,23 @@
+[Unit]
+Description=VAVA Home management and media server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vava
+Group=vava
+EnvironmentFile=-/etc/vava-server/server.env
+ExecStart=/usr/local/libexec/vava-server-run
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/vava-server
+LimitNOFILE=2048
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+state_dir="$(uci -q get vava-agent.main.state_dir || true)"
+[ -n "$state_dir" ] || state_dir=/etc/vava-state
+case "$state_dir" in /*) ;; *) exit 2 ;; esac
+case "$state_dir" in /|*/../*|*/./*|*/..|*/.) exit 2 ;; esac
+[ "$#" -eq 1 ] || exit 2
+case "$1" in
+  open) exec /usr/bin/vavactl -s "$state_dir/control.sock" pair-open 120 ;;
+  close) exec /usr/bin/vavactl -s "$state_dir/control.sock" pair-close ;;
+  *) exit 2 ;;
+esac

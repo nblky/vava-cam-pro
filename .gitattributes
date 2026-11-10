@@ -1,0 +1,19 @@
+* text=auto
+*.c text eol=lf
+*.h text eol=lf
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+Makefile text eol=lf
+*.sh text eol=lf
+*.init text eol=lf
+*.config text eol=lf
+**/files/vava-* text eol=lf
+**/uci-defaults/* text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.tar.gz binary
